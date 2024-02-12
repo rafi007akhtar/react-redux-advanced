@@ -28,7 +28,7 @@ const cartSlice = createSlice({
     removeItemFromCart(state, action) {
       state.totalQuantity--;
       const id = action.payload;
-      const existingItemId = state.items.findIndex((item) => item.itemId === id); // assumption: the index is never -1
+      const existingItemId = state.items.findIndex((item) => item.itemId === id);  // assumption: the index is never -1
       const existingItem = state.items[existingItemId];
       if (existingItem.quantity === 1) {
         state.items.splice(existingItemId, 1);
