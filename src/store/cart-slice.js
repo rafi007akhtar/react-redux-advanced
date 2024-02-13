@@ -1,16 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { uiActions } from "./ui-slice";
-import { cleanFetch } from "../utils/apiUtils";
-import { urls } from "../utils/constants";
-
-const { FIREBASE_URL, CART_JSON_SUFFIX } = urls;
-const completeURL = `${FIREBASE_URL}${CART_JSON_SUFFIX}`;
 
 const cartSlice = createSlice({
   name: "cart",
   initialState: {
     items: [],
     totalQuantity: 0,
+    changed: false,
   },
   reducers: {
     addItemToCart(state, action) {
@@ -31,6 +26,7 @@ const cartSlice = createSlice({
         existingItem.quantity++;
         existingItem.totalPrice += existingItem.price;
       }
+      state.changed = true;
     },
 
     removeItemFromCart(state, action) {
@@ -46,52 +42,16 @@ const cartSlice = createSlice({
         existingItem.quantity--;
         existingItem.totalPrice -= existingItem.price;
       }
+      state.changed = true;
+    },
+
+    replaceCart(state, action) {
+      state.items = action.payload.items;
+      state.totalQuantity = action.payload.totalQuantity;
     },
   },
 });
 
 export const cartActions = cartSlice.actions;
-
-/**
- * NOTE: A THUNK is an action creator.
- * It takes a state variable from the redux store, and returns the action function.
- * The action function can then be dispatched as needed in the code.
- * This will handle side-effects in a cleaner and decoupled way.
- */
-export function sendCartDataThunk(cart) {
-  return async (dispatch) => {
-    dispatch(
-      uiActions.showNotification({
-        status: "pending",
-        title: "Sending...",
-        message: "Sending cart data.",
-      })
-    );
-
-    const [data, err] = await cleanFetch(completeURL, {
-      method: "PUT",
-      body: JSON.stringify(cart),
-    });
-
-    if (err || !data) {
-      dispatch(
-        uiActions.showNotification({
-          status: "error",
-          title: "Error",
-          message: "Sending cart data failed.",
-        })
-      );
-      return;
-    }
-
-    dispatch(
-      uiActions.showNotification({
-        status: "success",
-        title: "Success",
-        message: "Sending cart data successful",
-      })
-    );
-  };
-}
 
 export default cartSlice;

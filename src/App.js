@@ -5,7 +5,7 @@ import Products from "./components/Shop/Products";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import Notification from "./components/UI/Notification";
-import { sendCartDataThunk } from "./store/cart-slice";
+import { fetchCartDataThunk, sendCartDataThunk } from "./store/cart-actions";
 
 let initialLoad = true;
 
@@ -15,12 +15,22 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    // on page load, show the previously added cart items
+    const fetchCardDataAction = fetchCartDataThunk();
+    dispatch(fetchCardDataAction);
+  }, [dispatch]);
+
+  useEffect(() => {
     // NOTE: you should NOT make the parent useEffect function async
     // so we're writing a new function, making that async, and calling that instead
 
     // don't send HTTP request on page load, because it will override the stored data
     if (initialLoad) {
       initialLoad = false;
+      return;
+    }
+
+    if (!cart.changed) {
       return;
     }
 
